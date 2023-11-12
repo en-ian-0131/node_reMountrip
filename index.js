@@ -53,12 +53,37 @@ server.get("/coupon_limit5", async (req, res) => {
   const [response] = await db.query("SELECT * FROM coupon LIMIT 5");
   res.json(response);
 });
-server.get("/like", async (req, res) => {
-  console.log("123:",req)
-  // const [response] = await db.query("INSERT INTO favorite (member_sid, trails_sid, status) VALUES ('[value-1]','[value-2]','[value-3]')");
+
+server.get("/getlikeData", async (req, res) => {
+  console.log("req:", req.query);
+  const [response] = await db.query(
+    `SELECT trails.sid,trails.trail_name,favorite.status FROM trails JOIN favorite ON favorite.trails_sid = trails.sid WHERE favorite.member_sid = ${req.query.memberSid} AND favorite.status = 0`
+  );
   res.json(response);
 });
+server.get("/getlike", async (req, res) => {
+  const [response] = await db.query(
+    `SELECT favorite.trails_sid,favorite.status FROM favorite WHERE member_sid=${req.query.memberSid}`
+  );
+  res.json(response);
+});
+server.get("/saveLike", async (req, res) => {
+  const selectData = await db.query(
+    `SELECT * FROM favorite WHERE favorite.member_sid IN (${req.query.memberSid}) AND favorite.trails_sid IN (${req.query.trailSid})`
+  );
 
+  if (selectData[0].length === 0) {
+    const [NoData] = await db.query(
+      `INSERT INTO favorite(member_sid, trails_sid, status) VALUES (${req.query.memberSid},${req.query.trailSid},${req.query.favoriteState})`
+    );
+    res.json(NoData);
+  } else {
+    const [haveData] = await db.query(
+      `UPDATE favorite SET favorite.status=${req.query.favoriteState} WHERE favorite.member_sid = ${req.query.memberSid} AND favorite.trails_sid= ${req.query.trailSid}`
+    );
+    res.json(haveData);
+  }
+});
 server.post("/login", async (req, res) => {
   const output = {
     success: false,
