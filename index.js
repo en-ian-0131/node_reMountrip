@@ -43,9 +43,9 @@ server.get("/trails_Limit8", async (req, res) => {
   const [response] = await db.query("SELECT * From trails LIMIT 8");
   res.json(response);
 });
-server.get("/member_limit1", async (req, res) => {
+server.get("/member", async (req, res) => {
   const [response] = await db.query(
-    "SELECT member.account,member.firstname,member.lastname,member.gender,member.birthday,member.city,member.address,member.email,member.mobile FROM member LIMIT 1"
+    `SELECT member.account,member.firstname,member.lastname,member.gender,member.birthday,member.city,member.address,member.email,member.mobile FROM member WHERE member.account="${req.query.account}"`
   );
   res.json(response);
 });
@@ -55,7 +55,6 @@ server.get("/coupon_limit5", async (req, res) => {
 });
 
 server.get("/getlikeData", async (req, res) => {
-  console.log("req:", req.query);
   const [response] = await db.query(
     `SELECT trails.sid,trails.trail_name,favorite.status FROM trails JOIN favorite ON favorite.trails_sid = trails.sid WHERE favorite.member_sid = ${req.query.memberSid} AND favorite.status = 0`
   );
